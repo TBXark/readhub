@@ -5,31 +5,34 @@ import '../service/network.dart';
 import 'webController.dart';
 import 'topicDetailController.dart';
 
+class TopicCellWrapper {
+  Topic topic;
+  DateTime publishDate;
+  bool isExpand = false;
+  TopicCellWrapper(Topic data) {
+    topic = data;
+    topic.title = data.title.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
+    topic.summary =  data.summary.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
+    publishDate = DateTime.parse(data.publishDate);
+  }
+}
+
 class TopicCell extends StatefulWidget {
-  final Topic topic;
+  final TopicCellWrapper topic;
   TopicCell({this.topic});
 
   @override
-  _TopicCellSate createState() => _TopicCellSate.build(topic);
+  _TopicCellSate createState() => _TopicCellSate(topic: topic);
 }
 
 class _TopicCellSate extends State<TopicCell> {
-  Topic _topic;
-  DateTime _time;
-  bool _isExpand = false;
 
-  _TopicCellSate.build(Topic topic) {
-    _topic = topic;
-    _topic.title =
-        _topic.title.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
-    _topic.summary =
-        _topic.summary.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
-    _time = DateTime.parse(_topic.publishDate);
-  }
+  final TopicCellWrapper topic;
+  _TopicCellSate({this.topic});
 
   changeExpandState() {
     setState(() {
-      _isExpand = !_isExpand;
+      topic.isExpand = !topic.isExpand;
     });
   }
 
@@ -39,20 +42,20 @@ class _TopicCellSate extends State<TopicCell> {
           margin: EdgeInsets.only(bottom: 10),
           child: Text.rich(TextSpan(children: [
             TextSpan(
-                text: _topic.title,
+                text: topic.topic.title,
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     height: 1,
                     color: Colors.black)),
             TextSpan(
-                text: "\n" + timeago.format(_time, locale: 'en'),
+                text: "\n" + timeago.format(topic.publishDate, locale: 'en'),
                 style: TextStyle(
                     fontSize: 12, height: 1.2, color: Colors.black54)),
           ]))),
       Text(
-        _topic.summary,
-        maxLines: _isExpand ? null : 3,
+        topic.topic.summary,
+        maxLines: topic.isExpand ? null : 3,
         style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.normal,
@@ -60,8 +63,8 @@ class _TopicCellSate extends State<TopicCell> {
             color: Colors.black87),
       )
     ];
-    if (_isExpand) {
-      for (NewsArray news in _topic.newsArray) {
+    if (topic.isExpand) {
+      for (NewsArray news in topic.topic.newsArray) {
         list.add(Container(
           margin: EdgeInsets.only(top: 8),
           child: GestureDetector(
@@ -87,17 +90,24 @@ class _TopicCellSate extends State<TopicCell> {
 
       list.add(ConstrainedBox(
         constraints: BoxConstraints(minWidth: double.infinity),
-        child: FlatButton(onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (ctx) {
-            return TopicDetailController(topic: _topic,);
-          }));
-        }, child: Row(children: <Widget>[Text("查看话题 ‣")], mainAxisAlignment: MainAxisAlignment.end,)),
+        child: FlatButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (ctx) {
+                return TopicDetailController(
+                  topic: topic.topic,
+                );
+              }));
+            },
+            child: Row(
+              children: <Widget>[Text("查看话题 ‣")],
+              mainAxisAlignment: MainAxisAlignment.end,
+            )),
       ));
     }
 
     return Container(
         color: Colors.white,
-        padding: EdgeInsets.fromLTRB(12, 12, 12, _isExpand ? 2 : 12),
+        padding: EdgeInsets.fromLTRB(12, 12, 12, topic.isExpand ? 2 : 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: list,
@@ -106,6 +116,13 @@ class _TopicCellSate extends State<TopicCell> {
 
   @override
   Widget build(BuildContext context) {
+    /*
+    BoxDecoration(boxShadow: [
+            BoxShadow(
+                color: Colors.black26, offset: Offset(0, 0), blurRadius: 10)
+          ]
+          )
+    */
     return GestureDetector(
       onTap: () {
         changeExpandState();
@@ -113,15 +130,10 @@ class _TopicCellSate extends State<TopicCell> {
       child: Container(
         padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
         child: DecoratedBox(
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(
-                color: Colors.black26, offset: Offset(0, 0), blurRadius: 10)
-          ]),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
-            child: buildBody(),
-          ),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              border: Border.all(color: Colors.black26)),
+          child: buildBody(),
         ),
       ),
     );
@@ -130,11 +142,11 @@ class _TopicCellSate extends State<TopicCell> {
 
 class TopocListController extends StatefulWidget {
   @override
-  _TopocListControllerState createState() => _TopocListControllerState();
+  _TopicListControllerState createState() => _TopicListControllerState();
 }
 
-class _TopocListControllerState extends State<TopocListController> {
-  List<Topic> _list = [];
+class _TopicListControllerState extends State<TopocListController> {
+  List<TopicCellWrapper> _list = [];
 
   @override
   void initState() {
@@ -166,8 +178,7 @@ class _TopocListControllerState extends State<TopocListController> {
   loadData() {
     Network.shared.getList(0).then((value) {
       setState(() {
-//          _list = value.data.cast<Topic>();
-        _list = value.data;
+        _list = value.data.map( (v) => TopicCellWrapper(v)).toList();
       });
     });
   }

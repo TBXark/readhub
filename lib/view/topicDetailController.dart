@@ -66,23 +66,26 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
     List<Widget> list = [
       Container(
           margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
-          child: Text.rich(TextSpan(children: [
-            TextSpan(
-                text: topic.title == null ? "" : topic.title,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    height: 1,
-                    color: Colors.black)),
-            TextSpan(
-                text: topic.publishDate == null
-                    ? ""
-                    : ("\n" +
-                        timeago.format(DateTime.parse(topic.publishDate),
-                            locale: 'en')),
-                style: TextStyle(
-                    fontSize: 14, height: 1.2, color: Colors.black54)),
-          ]))),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: double.infinity),
+            child: Text.rich(TextSpan(children: [
+              TextSpan(
+                  text: topic.title == null ? "" : topic.title,
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      height: 1,
+                      color: Colors.black)),
+              TextSpan(
+                  text: topic.publishDate == null
+                      ? ""
+                      : ("\n" +
+                          timeago.format(DateTime.parse(topic.publishDate),
+                              locale: 'en')),
+                  style: TextStyle(
+                      fontSize: 14, height: 1.2, color: Colors.black54)),
+            ])),
+          )),
     ];
 
     if (instantViewEnable && showInstantView) {
@@ -156,17 +159,20 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
                 );
               }));
             },
-            child: Text.rich(TextSpan(children: [
-              TextSpan(
-                  text: " ∙  " + tp.title.replaceAll("\n", ""),
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black)),
-              TextSpan(
-                  text: "  " + timeago.format(DateTime.parse(tp.createdAt)),
-                  style: TextStyle(fontSize: 12, color: Colors.black54)),
-            ])),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: double.infinity),
+              child: Text.rich(TextSpan(children: [
+                TextSpan(
+                    text: " ∙  " + tp.title.replaceAll("\n", ""),
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black)),
+                TextSpan(
+                    text: "  " + timeago.format(DateTime.parse(tp.createdAt)),
+                    style: TextStyle(fontSize: 12, color: Colors.black54)),
+              ])),
+            ),
           ),
         ));
       }

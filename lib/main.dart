@@ -11,6 +11,7 @@ class ReadhubApp extends StatelessWidget {
       title: 'Readhub',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
+        scaffoldBackgroundColor: Color.fromARGB(255, 240, 240, 240),
       ),
       home: HomePage(),
     );
