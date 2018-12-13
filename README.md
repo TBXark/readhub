@@ -3,8 +3,8 @@
 A redhub application.
 
 ## Preview
-![](./images/list.png)
-![](./images/detail.png)
+![](images/list.jpeg)
+![](images/detail.jpeg)
 
 
 ## Getting Started
