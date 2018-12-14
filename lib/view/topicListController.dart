@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import "package:pull_to_refresh/pull_to_refresh.dart";
 import '../model/topic.dart';
 import '../service/network.dart';
 import 'webController.dart';
@@ -11,8 +12,10 @@ class TopicCellWrapper {
   bool isExpand = false;
   TopicCellWrapper(Topic data) {
     topic = data;
-    topic.title = data.title.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
-    topic.summary =  data.summary.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
+    topic.title =
+        data.title.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
+    topic.summary =
+        data.summary.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
     publishDate = DateTime.parse(data.publishDate);
   }
 }
@@ -26,7 +29,6 @@ class TopicCell extends StatefulWidget {
 }
 
 class _TopicCellSate extends State<TopicCell> {
-
   final TopicCellWrapper topic;
   _TopicCellSate({this.topic});
 
@@ -147,11 +149,12 @@ class TopocListController extends StatefulWidget {
 
 class _TopicListControllerState extends State<TopocListController> {
   List<TopicCellWrapper> _list = [];
+  RefreshController refreshController = RefreshController();
 
   @override
   void initState() {
     super.initState();
-    loadData();
+    loadData(true);
   }
 
   @override
@@ -160,26 +163,49 @@ class _TopicListControllerState extends State<TopocListController> {
       return Center(
         child: FlatButton(
             onPressed: () {
-              loadData();
+              loadData(true);
             },
             child: Text("Reload")),
       );
     } else {
-      return ListView.builder(
-          itemCount: _list.length,
-          itemBuilder: (ctx, index) {
-            return TopicCell(
-              topic: _list[index],
-            );
-          });
+      return SmartRefresher(
+        controller: refreshController,
+        enableOverScroll: true,
+        enablePullDown: true,
+        enablePullUp: _list.isNotEmpty,
+        onRefresh: loadData,
+        child: ListView.builder(
+            itemCount: _list.length,
+            itemBuilder: (ctx, index) {
+              return TopicCell(
+                topic: _list[index],
+              );
+            }),
+      );
     }
   }
 
-  loadData() {
-    Network.shared.getList(0).then((value) {
+  loadData(bool up) {
+    var lastCursor = up ? null : _list.last.topic.order;
+    Network.shared.getList(lastCursor).then((value) {
+      var temp = value.data.map((v) => TopicCellWrapper(v)).toList();
+      try {
+        refreshController.sendBack(up, RefreshStatus.completed);
+        refreshController.sendBack(up, RefreshStatus.idle);
+
+      } catch(e) {}
       setState(() {
-        _list = value.data.map( (v) => TopicCellWrapper(v)).toList();
+        if (up) {
+          _list = temp;
+        } else {
+          _list.addAll(temp);
+        }
       });
+    }).catchError((error) {
+      try {
+        refreshController.sendBack(up, RefreshStatus.failed);
+        refreshController.sendBack(up, RefreshStatus.idle);
+      } catch(e) {}
     });
   }
 }

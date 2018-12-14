@@ -12,9 +12,9 @@ class Network {
     dio.options.receiveTimeout = 5000;
   }
 
-  Future<TopicList> getList(int page) async {
+  Future<TopicList> getList(int lastCursor) async {
     try {
-      Response response = await dio.get("topic?lastCursor&pageSize=20&page=$page");
+      Response response = await dio.get("topic", data: {"lastCursor": lastCursor ?? "", "pageSize": 20});
       var json = response.data as Map<String, dynamic>;
       var temp = TopicList.fromJson(json);
       return temp;
@@ -36,7 +36,7 @@ class Network {
 
   Future<InstantView> getInstantView(String id) async {
     try {
-      Response response = await dio.get("topic/instantview?topicId=$id");
+      Response response = await dio.get("topic/instantview", data: {"topicId": id});
       var json = response.data as Map<String, dynamic>;
       var temp = InstantView.fromJson(json);
       return temp;
