@@ -383,12 +383,4 @@ class InstantView {
     siteName = json['siteName'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['url'] = this.url;
-    data['title'] = this.title;
-    data['content'] = this.content;
-    data['siteName'] = this.siteName;
-    return data;
-  }
 }

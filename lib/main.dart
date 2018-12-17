@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './view/topicListController.dart';
+import './view/topic_list_controller.dart';
 
 void main() => runApp(ReadhubApp());
 
@@ -21,6 +21,11 @@ class ReadhubApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: Text("Readhub"),), body: TopocListController(),);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Readhub"),
+      ),
+      body: TopocListController(),
+    );
   }
 }

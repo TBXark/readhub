@@ -3,7 +3,7 @@ import 'package:flutter_html_view/flutter_html_view.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../model/topic.dart';
 import '../service/network.dart';
-import 'webController.dart';
+import 'web_controller.dart';
 
 class TopicDetailController extends StatefulWidget {
   final Topic topic;
@@ -62,7 +62,7 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
     );
   }
 
-  Widget buildBody() {
+  Widget _buildBody() {
     List<Widget> list = [
       Container(
           margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -113,7 +113,7 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
       ));
     }
 
-    if (topic.newsArray != null && topic.newsArray.isNotEmpty) {
+    if (topic?.newsArray?.isNotEmpty ?? false) {
       list.add(buildSectionTitle(Icons.apps, "媒体报道"));
       for (NewsArray news in topic.newsArray) {
         list.add(Container(
@@ -140,9 +140,7 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
       }
     }
 
-    if (topic.timeline != null &&
-        topic.timeline.topics != null &&
-        topic.timeline.topics.isNotEmpty) {
+    if (topic.timeline?.topics?.isNotEmpty ?? false) {
       list.add(Container(
         margin: EdgeInsets.only(top: 10),
         child: buildSectionTitle(Icons.all_inclusive, "相关事件"),
@@ -234,12 +232,12 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
         title: Text(topic.title),
         actions: buildActions(),
       ),
-      body: buildBody(),
+      body: _buildBody(),
     );
   }
 
   loadData() {
-    if (topic != null && topic.id != null) {
+    if (topic?.id != null) {
       Network.shared.getDetail(topic.id).then((value) {
         value.title =
             value.title.replaceAll(RegExp(r"[\n\r]*$", multiLine: true), "");
