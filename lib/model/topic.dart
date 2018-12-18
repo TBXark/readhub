@@ -384,3 +384,31 @@ class InstantView {
   }
 
 }
+
+
+class NewCount {
+  int count;
+  List<TopicId> data;
+
+  NewCount({this.count, this.data});
+
+  NewCount.fromJson(Map<String, dynamic> json) {
+    count = json['count'];
+    if (json['data'] != null) {
+      data = new List<TopicId>();
+      json['data'].forEach((v) {
+        data.add(new TopicId.fromJson(v));
+      });
+    }
+  }
+}
+
+class TopicId {
+  String id;
+
+  TopicId({this.id});
+
+  TopicId.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+  }
+}

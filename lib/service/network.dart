@@ -44,4 +44,15 @@ class Network {
       return Future.error(e);
     }
   }
+
+  Future<NewCount> getNewCount(int order) async {
+    try {
+      Response response = await dio.get("topic/newCount", data: {"latestCursor": order});
+      var json = response.data as Map<String, dynamic>;
+      var temp = NewCount.fromJson(json);
+      return temp;
+    } catch(e) {
+      return Future.error(e);
+    }
+  }
 }

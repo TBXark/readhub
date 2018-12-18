@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import "package:pull_to_refresh/pull_to_refresh.dart";
+
 import '../model/topic.dart';
 import '../service/network.dart';
 import 'web_controller.dart';
@@ -13,12 +15,23 @@ class TopocListController extends StatefulWidget {
 
 class _TopicListControllerState extends State<TopocListController> {
   List<_TopicCellWrapper> _list = [];
-  RefreshController refreshController = RefreshController();
+  int _unloadTopicCount = 1;
+  Timer _loadUnloadCountRequestTimer;
+  RefreshController _refreshController = RefreshController();
 
   @override
   void initState() {
     super.initState();
     loadData(true);
+    _loadUnloadCountRequestTimer = Timer.periodic(Duration(seconds: 10), (t){
+      loadUnreadCount();
+    });
+  }
+
+  @override
+  void dispose() {
+    _loadUnloadCountRequestTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -32,8 +45,8 @@ class _TopicListControllerState extends State<TopocListController> {
             child: Text("Reload")),
       );
     } else {
-      return SmartRefresher(
-        controller: refreshController,
+      var list = SmartRefresher(
+        controller: _refreshController,
         enableOverScroll: true,
         enablePullDown: true,
         enablePullUp: _list.isNotEmpty,
@@ -46,6 +59,64 @@ class _TopicListControllerState extends State<TopocListController> {
               );
             }),
       );
+      var children = <Widget>[Positioned.fill(child: list)];
+      if (_unloadTopicCount > 0) {
+        children.add(Positioned(
+          top: 10,
+          left: 0,
+          right: 0,
+          height: 30,
+          child: Container(
+              alignment: Alignment.center,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        blurRadius: 2,
+                        offset: Offset(0, 3),
+                        color: Colors.black38)
+                  ],
+                ),
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(4, 0, 4, 0),
+                  child: FlatButton(
+                      onPressed: () {
+                        _refreshController.scrollController?.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut).then((some) {
+                          _refreshController.requestRefresh(true);
+                        });
+                      },
+                      child: Text(
+                        "发现$_unloadTopicCount条新的资讯",
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ),
+              )),
+        ));
+      }
+      return ConstrainedBox(
+        constraints: BoxConstraints.expand(),
+        child: Stack(
+          children: children,
+        ),
+      );
+    }
+  }
+
+  loadUnreadCount() {
+    if (_list?.first?.topic?.order != null) {
+      Network.shared.getNewCount(_list?.first?.topic?.order).then((count) {
+        setState(() {
+          _unloadTopicCount = count.count ?? 0;
+        });
+      }).catchError((e) {
+        _unloadTopicCount = 0;
+      });
+    } else {
+      setState(() {
+        _unloadTopicCount = 0;
+      });
     }
   }
 
@@ -54,20 +125,21 @@ class _TopicListControllerState extends State<TopocListController> {
     Network.shared.getList(lastCursor).then((value) {
       var temp = value.data.map((v) => _TopicCellWrapper(v)).toList();
       try {
-        refreshController.sendBack(up, RefreshStatus.completed);
-        refreshController.sendBack(up, RefreshStatus.idle);
+        _refreshController.sendBack(up, RefreshStatus.completed);
+        _refreshController.sendBack(up, RefreshStatus.idle);
       } catch (e) {}
       setState(() {
         if (up) {
           _list = temp;
+          _unloadTopicCount = 0;
         } else {
           _list.addAll(temp);
         }
       });
     }).catchError((error) {
       try {
-        refreshController.sendBack(up, RefreshStatus.failed);
-        refreshController.sendBack(up, RefreshStatus.idle);
+        _refreshController.sendBack(up, RefreshStatus.failed);
+        _refreshController.sendBack(up, RefreshStatus.idle);
       } catch (e) {}
     });
   }
