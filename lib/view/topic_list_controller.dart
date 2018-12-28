@@ -23,7 +23,7 @@ class _TopicListControllerState extends State<TopocListController> {
   void initState() {
     super.initState();
     loadData(true);
-    _loadUnloadCountRequestTimer = Timer.periodic(Duration(seconds: 10), (t){
+    _loadUnloadCountRequestTimer = Timer.periodic(Duration(seconds: 10), (t) {
       loadUnreadCount();
     });
   }
@@ -70,26 +70,35 @@ class _TopicListControllerState extends State<TopocListController> {
               alignment: Alignment.center,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                        blurRadius: 2,
-                        offset: Offset(0, 3),
-                        color: Colors.black38)
-                  ],
-                ),
+                    color: Theme.of(context).buttonColor,
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                          blurRadius: 2,
+                          offset: Offset(0, 3),
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.black38
+                                  : Colors.white30),
+                    ]),
                 child: Container(
                   padding: EdgeInsets.fromLTRB(4, 0, 4, 0),
                   child: FlatButton(
                       onPressed: () {
-                        _refreshController.scrollController?.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut).then((some) {
+                        _refreshController.scrollController
+                            ?.animateTo(0,
+                                duration: Duration(milliseconds: 500),
+                                curve: Curves.easeInOut)
+                            ?.then((some) {
                           _refreshController.requestRefresh(true);
                         });
                       },
                       child: Text(
                         "发现$_unloadTopicCount条新的资讯",
-                        style: TextStyle(color: Colors.white),
+                        style: Theme.of(context)
+                            .textTheme
+                            .button
+                            .apply(color: Theme.of(context).hintColor),
                       )),
                 ),
               )),
@@ -182,17 +191,12 @@ class _TopicCellSate extends State<_TopicCell> {
     List<TextSpan> textSpans = [];
     if (topic?.topic?.title != null) {
       textSpans.add(TextSpan(
-          text: topic.topic.title,
-          style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              height: 1,
-              color: Colors.black)));
+          text: topic.topic.title, style: Theme.of(context).textTheme.title));
     }
     if (topic?.publishDate != null) {
       textSpans.add(TextSpan(
           text: "\n" + timeago.format(topic.publishDate, locale: 'en'),
-          style: TextStyle(fontSize: 12, height: 1.2, color: Colors.black54)));
+          style: Theme.of(context).textTheme.overline));
     }
     return Container(
         margin: EdgeInsets.only(bottom: 10),
@@ -204,11 +208,7 @@ class _TopicCellSate extends State<_TopicCell> {
       return Text(
         topic.topic.summary,
         maxLines: topic.isExpand ? null : 3,
-        style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.normal,
-            height: 1.2,
-            color: Colors.black87),
+        style: Theme.of(context).textTheme.caption,
       );
     } else {
       return Text("");
@@ -232,13 +232,10 @@ class _TopicCellSate extends State<_TopicCell> {
               child: Text.rich(TextSpan(children: [
                 TextSpan(
                     text: " ∙  " + news.title,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black)),
+                    style: Theme.of(context).textTheme.subhead),
                 TextSpan(
                     text: "  " + news.siteName,
-                    style: TextStyle(fontSize: 12, color: Colors.black54)),
+                    style: Theme.of(context).textTheme.overline),
               ])),
             ),
           ));
@@ -256,14 +253,19 @@ class _TopicCellSate extends State<_TopicCell> {
               }));
             },
             child: Row(
-              children: <Widget>[Text("查看话题 ‣")],
+              children: <Widget>[
+                Text(
+                  "查看话题 ‣",
+                  style: Theme.of(context).textTheme.button,
+                )
+              ],
               mainAxisAlignment: MainAxisAlignment.end,
             )),
       ));
     }
 
     return Container(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         padding: EdgeInsets.fromLTRB(12, 12, 12, topic.isExpand ? 2 : 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,12 +281,7 @@ class _TopicCellSate extends State<_TopicCell> {
       },
       child: Container(
         padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(4)),
-              border: Border.all(color: Colors.black26)),
-          child: _buildBody(),
-        ),
+        child: _buildBody(),
       ),
     );
   }

@@ -54,8 +54,7 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
           ),
           Text(
             " $title",
-            style: TextStyle(
-                color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 0.9),
           )
         ],
       ),
@@ -71,19 +70,14 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
             child: Text.rich(TextSpan(children: [
               TextSpan(
                   text: topic.title == null ? "" : topic.title,
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      height: 1,
-                      color: Colors.black)),
+                  style: Theme.of(context).textTheme.title),
               TextSpan(
                   text: topic.publishDate == null
                       ? ""
                       : ("\n" +
                           timeago.format(DateTime.parse(topic.publishDate),
                               locale: 'en')),
-                  style: TextStyle(
-                      fontSize: 14, height: 1.2, color: Colors.black54)),
+                  style: Theme.of(context).textTheme.overline),
             ])),
           )),
     ];
@@ -104,11 +98,7 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
         child: Text(
           topic.summary == null ? "载入中" : topic.summary,
           maxLines: null,
-          style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-              height: 1.2,
-              color: Colors.black87),
+          style: Theme.of(context).textTheme.caption,
         ),
       ));
     }
@@ -127,13 +117,10 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
             child: Text.rich(TextSpan(children: [
               TextSpan(
                   text: " ∙  " + news.title.replaceAll("\n", ""),
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black)),
+                  style: Theme.of(context).textTheme.subhead),
               TextSpan(
                   text: "  " + news.siteName,
-                  style: TextStyle(fontSize: 12, color: Colors.black54)),
+                  style: Theme.of(context).textTheme.overline),
             ])),
           ),
         ));
@@ -162,13 +149,10 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
               child: Text.rich(TextSpan(children: [
                 TextSpan(
                     text: " ∙  " + tp.title.replaceAll("\n", ""),
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black)),
+                    style: Theme.of(context).textTheme.subhead),
                 TextSpan(
                     text: "  " + timeago.format(DateTime.parse(tp.createdAt)),
-                    style: TextStyle(fontSize: 12, color: Colors.black54)),
+                    style: Theme.of(context).textTheme.overline),
               ])),
             ),
           ),
@@ -180,7 +164,9 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
           decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(8)),
               border: Border.all(
-                color: Colors.black12,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.black12
+                    : Colors.white12,
                 width: 1,
               )),
           child: Container(
@@ -196,7 +182,7 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
 
     return SingleChildScrollView(
       child: Container(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
