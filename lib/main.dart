@@ -20,8 +20,6 @@ class _ReadhubAppState extends State<ReadhubApp> {
       title: 'Readhub',
       theme: ThemeData(
         brightness: brightness,
-        accentColorBrightness: brightness,
-        primaryColorBrightness: brightness,
         primarySwatch:  isDark ? Colors.grey : Colors.blueGrey,
         scaffoldBackgroundColor: isDark ? Color.fromARGB(255, 10, 10, 10) : Color.fromARGB(255, 240, 240, 240),
         cardColor: isDark ? Color.fromARGB(255, 20, 20, 20) : Colors.white,
