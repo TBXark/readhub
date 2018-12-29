@@ -180,14 +180,12 @@ class _TopicDetailControllerState extends State<TopicDetailController> {
       ));
     }
 
-    return SingleChildScrollView(
-      child: Container(
-          color: Theme.of(context).cardColor,
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: list,
-          )),
+    return Container(
+      color: Theme.of(context).cardColor,
+      child: ListView(
+        padding: EdgeInsets.all(20),
+        children: list,
+      ),
     );
   }
 

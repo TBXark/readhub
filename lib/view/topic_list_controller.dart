@@ -3,21 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import "package:pull_to_refresh/pull_to_refresh.dart";
 
-import '../model/topic.dart';
-import '../service/network.dart';
 import 'web_controller.dart';
 import 'topic_detail_controller.dart';
 
-class TopocListController extends StatefulWidget {
+import '../model/topic.dart';
+import '../service/network.dart';
+
+class TopicListController extends StatefulWidget {
+  final bool hideSummary;
+
+  TopicListController({Key key, this.hideSummary}) : super(key: key);
+
   @override
-  _TopicListControllerState createState() => _TopicListControllerState();
+  _TopicListControllerState createState() =>
+      _TopicListControllerState(hideSummary: this.hideSummary);
+
 }
 
-class _TopicListControllerState extends State<TopocListController> {
+class _TopicListControllerState extends State<TopicListController> {
+  final bool hideSummary;
+  final RefreshController _refreshController = RefreshController();
   List<_TopicCellWrapper> _list = [];
-  int _unloadTopicCount = 1;
+  int _unloadTopicCount = 0;
   Timer _loadUnloadCountRequestTimer;
-  RefreshController _refreshController = RefreshController();
+
+  _TopicListControllerState({this.hideSummary});
 
   @override
   void initState() {
@@ -36,81 +46,69 @@ class _TopicListControllerState extends State<TopocListController> {
 
   @override
   Widget build(BuildContext context) {
-    if (_list.isEmpty) {
-      return Center(
-        child: FlatButton(
-            onPressed: () {
-              loadData(true);
-            },
-            child: Text("Reload")),
-      );
-    } else {
-      var list = SmartRefresher(
-        controller: _refreshController,
-        enableOverScroll: true,
-        enablePullDown: true,
-        enablePullUp: _list.isNotEmpty,
-        onRefresh: loadData,
-        child: ListView.builder(
-            itemCount: _list.length,
-            itemBuilder: (ctx, index) {
-              return _TopicCell(
-                topic: _list[index],
-              );
-            }),
-      );
-      var children = <Widget>[Positioned.fill(child: list)];
-      if (_unloadTopicCount > 0) {
-        children.add(Positioned(
-          top: 10,
-          left: 0,
-          right: 0,
-          height: 30,
-          child: Container(
-              alignment: Alignment.center,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                    color: Theme.of(context).buttonColor,
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                          blurRadius: 2,
-                          offset: Offset(0, 3),
-                          color:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.black38
-                                  : Colors.white30),
-                    ]),
-                child: Container(
-                  padding: EdgeInsets.fromLTRB(4, 0, 4, 0),
-                  child: FlatButton(
-                      onPressed: () {
-                        _refreshController.scrollController
-                            ?.animateTo(0,
-                                duration: Duration(milliseconds: 500),
-                                curve: Curves.easeInOut)
-                            ?.then((some) {
-                          _refreshController.requestRefresh(true);
-                        });
-                      },
-                      child: Text(
-                        "发现$_unloadTopicCount条新的资讯",
-                        style: Theme.of(context)
-                            .textTheme
-                            .button
-                            .apply(color: Theme.of(context).hintColor),
-                      )),
-                ),
-              )),
-        ));
-      }
-      return ConstrainedBox(
-        constraints: BoxConstraints.expand(),
-        child: Stack(
-          children: children,
-        ),
-      );
+    final list = SmartRefresher(
+      controller: _refreshController,
+      enableOverScroll: true,
+      enablePullDown: true,
+      enablePullUp: _list.isNotEmpty,
+      onRefresh: loadData,
+      child: ListView.builder(
+          itemCount: _list.length,
+          itemBuilder: (ctx, index) {
+            return _TopicCell(
+              topic: _list[index],
+              hideSummary: hideSummary,
+            );
+          }),
+    );
+    var children = <Widget>[Positioned.fill(child: list)];
+    if (_unloadTopicCount > 0) {
+      children.add(Positioned(
+        top: 10,
+        left: 0,
+        right: 0,
+        height: 30,
+        child: Container(
+            alignment: Alignment.center,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withAlpha(200),
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        blurRadius: 2,
+                        offset: Offset(0, 3),
+                        color: Colors.black38),
+                  ]),
+              child: Container(
+                padding: EdgeInsets.fromLTRB(4, 0, 4, 0),
+                child: FlatButton(
+                    onPressed: () {
+                      _refreshController.scrollController
+                          ?.animateTo(0,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut)
+                          ?.then((some) {
+                        _refreshController.requestRefresh(true);
+                      });
+                    },
+                    child: Text(
+                      "发现$_unloadTopicCount条新的资讯",
+                      style: Theme.of(context)
+                          .textTheme
+                          .button
+                          .apply(color: Theme.of(context).hintColor),
+                    )),
+              ),
+            )),
+      ));
     }
+    return ConstrainedBox(
+      constraints: BoxConstraints.expand(),
+      child: Stack(
+        children: children,
+      ),
+    );
   }
 
   loadUnreadCount() {
@@ -130,6 +128,7 @@ class _TopicListControllerState extends State<TopocListController> {
   }
 
   loadData(bool up) {
+    print("Load data forNew: $up");
     var lastCursor = up ? null : _list.last.topic.order;
     Network.shared.getList(lastCursor).then((value) {
       var temp = value.data.map((v) => _TopicCellWrapper(v)).toList();
@@ -171,15 +170,18 @@ class _TopicCellWrapper {
 
 class _TopicCell extends StatefulWidget {
   final _TopicCellWrapper topic;
-  _TopicCell({this.topic});
+  final bool hideSummary;
+  _TopicCell({this.topic, this.hideSummary});
 
   @override
-  _TopicCellSate createState() => _TopicCellSate(topic: topic);
+  _TopicCellSate createState() =>
+      _TopicCellSate(topic: topic, hideSummary: this.hideSummary);
 }
 
 class _TopicCellSate extends State<_TopicCell> {
   final _TopicCellWrapper topic;
-  _TopicCellSate({this.topic});
+  bool hideSummary;
+  _TopicCellSate({this.topic, this.hideSummary});
 
   changeExpandState() {
     setState(() {
@@ -215,8 +217,12 @@ class _TopicCellSate extends State<_TopicCell> {
     }
   }
 
-  Widget _buildBody() {
-    List<Widget> list = [_buildTitle(), _buildSummary()];
+  Widget _buildBody(bool hideSummary) {
+    List<Widget> list = [_buildTitle()];
+    final showSummary = (topic.isExpand || (!hideSummary));
+    if (showSummary) {
+      list.add(_buildSummary());
+    }
 
     if (topic.isExpand) {
       if (topic?.topic?.newsArray != null) {
@@ -266,7 +272,8 @@ class _TopicCellSate extends State<_TopicCell> {
 
     return Container(
         color: Theme.of(context).cardColor,
-        padding: EdgeInsets.fromLTRB(12, 12, 12, topic.isExpand ? 2 : 12),
+        padding: EdgeInsets.fromLTRB(
+            12, 12, 12, topic.isExpand ? 2 : (hideSummary ? 2 : 12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: list,
@@ -281,7 +288,7 @@ class _TopicCellSate extends State<_TopicCell> {
       },
       child: Container(
         padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
-        child: _buildBody(),
+        child: _buildBody(hideSummary),
       ),
     );
   }
