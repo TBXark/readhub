@@ -1,10 +1,12 @@
-# readhub
+# Readhub
 
-A redhub application.
+A redhub application by Flutter.
 
 ## Preview
-![](images/list.jpeg)
-![](images/detail.jpeg)
+|Night mode|Simple mode|Detail|
+|--|--|--|
+|![](design/appstore/iPhone_XS_Max_0.png)|![](design/appstore/iPhone_XS_Max_1.png)|![](design/appstore/iPhone_XS_Max_2.png)|
+
 
 
 ## Getting Started

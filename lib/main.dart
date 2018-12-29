@@ -11,7 +11,6 @@ class ReadhubApp extends StatefulWidget {
 }
 
 class _ReadhubAppState extends State<ReadhubApp> {
-  // This widget is the root of your application.
   Setting _setting;
   @override
   void initState() {
@@ -87,6 +86,7 @@ class _ReadhubAppState extends State<ReadhubApp> {
     if (_setting != null) {
       return MaterialApp(
         title: 'Readhub',
+        debugShowCheckedModeBanner: false,
         theme: buildTheme(_setting.brightness),
         home: HomePage(),
       );
