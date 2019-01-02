@@ -5,7 +5,7 @@ A redhub application by Flutter.
 ## Preview
 |Night mode|Simple mode|Detail|
 |--|--|--|
-|![](design/appstore/iPhone_XS_Max_0.png)|![](design/appstore/iPhone_XS_Max_1.png)|![](design/appstore/iPhone_XS_Max_2.png)|
+|![](design/appstore/iPhoneXSMax_0)|![](design/appstore/iPhoneXSMax_0)|![](design/appstore/iPhoneXSMax_0)|
 
 
 
