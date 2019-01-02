@@ -3,9 +3,9 @@
 A redhub application by Flutter.
 
 ## Preview
-|Night mode|Simple mode|Detail|
+|night mode|title mode|Detail|
 |--|--|--|
-|![](design/appstore/iPhoneXSMax_0)|![](design/appstore/iPhoneXSMax_0)|![](design/appstore/iPhoneXSMax_0)|
+|![](design/appstore/iPhoneXSMax_0.png)|![](design/appstore/iPhoneXSMax_1.png)|![](design/appstore/iPhoneXSMax_2.png)|
 
 
 
